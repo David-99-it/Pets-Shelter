@@ -19,6 +19,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 urlpatterns = [
+    path('',include('shelter.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('shelter.urls')),  # подключение API приложения
     path('api/token/', TokenObtainPairView.as_view()),  # <--- JWT токен

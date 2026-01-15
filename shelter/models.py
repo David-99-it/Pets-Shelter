@@ -9,6 +9,10 @@ class Animal(models.Model):
     age = models.IntegerField()
     status = models.CharField(max_length=10, choices=STATUS, default='free')
 
+    @property
+    def is_booked(self):
+        return AdoptionRequest.objects.filter(animal=self, status='approved').exists()
+
 class AdoptionRequest(models.Model):
     STATUS = [('pending','На рассмотрении'),('approved','Одобрено')]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -17,10 +21,9 @@ class AdoptionRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, default='pending')
 
     def save(self, *args, **kwargs):
-        if self.status == 'approved':
-            self.animal.status = 'booked'
-            self.animal.save()
         super().save(*args, **kwargs)
+
+
 
 class ShelterNews(models.Model):
     title = models.CharField(max_length=200)

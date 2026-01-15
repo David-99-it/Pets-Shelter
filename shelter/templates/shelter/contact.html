@@ -1,0 +1,18 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}Контакты - Приют "Добрые Лапы"{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-12 text-center">
+    <h1 class="text-4xl font-bold mb-4">Свяжитесь с нами</h1>
+    <p class="text-lg text-gray-600 mb-6">
+        Напишите нам на email <strong>info@dobrielapy.kg</strong> или позвоните <strong>+996 555 555 555</strong>.
+    </p>
+    <form class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-lg space-y-4">
+        <input type="text" placeholder="Ваше имя" class="w-full p-2 border rounded">
+        <input type="email" placeholder="Ваш email" class="w-full p-2 border rounded">
+        <textarea placeholder="Сообщение" class="w-full p-2 border rounded"></textarea>
+        <button class="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">Отправить</button>
+    </form>
+</section>
+{% endblock %}

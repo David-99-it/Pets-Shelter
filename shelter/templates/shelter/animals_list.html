@@ -1,0 +1,130 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Наши питомцы - Приют "Добрые Лапы"{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Наши Питомцы</h1>
+        <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+            Познакомьтесь с животными, которые ждут своего дома. Каждый из них особенный.
+        </p>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="max-w-4xl mx-auto mb-12">
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <div class="space-y-4">
+                <input type="text" id="animal-search" placeholder="Поиск по имени или типу..." class="form-input w-full p-3 rounded-lg border" value="{{ search_query|default:'' }}">
+                
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="form-label">Тип животного</label>
+                        <select name="animal_type" class="form-select w-full p-2 rounded border">
+                            <option value="">Все типы</option>
+                            <option value="dog" {% if animal_type == 'dog' %}selected{% endif %}>Собаки</option>
+                            <option value="cat" {% if animal_type == 'cat' %}selected{% endif %}>Кошки</option>
+                            <option value="other" {% if animal_type == 'other' %}selected{% endif %}>Другие</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Возраст</label>
+                        <select name="age" class="form-select w-full p-2 rounded border">
+                            <option value="">Любой возраст</option>
+                            <option value="young" {% if age == 'young' %}selected{% endif %}>До 1 года</option>
+                            <option value="adult" {% if age == 'adult' %}selected{% endif %}>1-7 лет</option>
+                            <option value="senior" {% if age == 'senior' %}selected{% endif %}>Старше 7 лет</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Статус</label>
+                        <select name="status" class="form-select w-full p-2 rounded border">
+                            <option value="">Все</option>
+                            <option value="available" {% if status == 'available' %}selected{% endif %}>Доступны</option>
+                            <option value="reserved" {% if status == 'reserved' %}selected{% endif %}>Забронированы</option>
+                        </select>
+                    </div>
+                </div>
+
+                {% url 'animals_list' as animals_url %}
+                <button type="button" onclick="window.location.href='{{ animals_url }}'" class="text-purple-600 hover:text-purple-700 font-semibold mt-4">
+                    Сбросить фильтры
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animals Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for animal in animals %}
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <a href="{% url 'animal_detail' animal.id %}">
+                {% if animal.image %}
+                <img src="{{ animal.image.url }}" alt="{{ animal.name }}" class="w-full h-48 object-cover">
+                {% else %}
+                <div class="flex items-center justify-center h-48 text-6xl">🐾</div>
+                {% endif %}
+            </a>
+            <div class="p-4">
+                <h3 class="font-bold text-xl mb-2">{{ animal.name }}</h3>
+
+                <!-- Кнопка бронирования -->
+                {% if animal.is_booked %}
+                    <button disabled class="mt-2 w-full bg-gray-400 text-white py-2 rounded">Забронирован</button>
+                {% else %}
+                    {% if user.is_authenticated %}
+                        <button onclick="bookAppointment('{{ animal.id }}')" class="mt-2 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">
+                            Забронировать встречу
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'animal_detail' animal.id %}" class="mt-2 w-full block bg-purple-600 text-white py-2 rounded text-center hover:bg-purple-700">
+                            Войдите для бронирования
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Статус животного -->
+                <span class="text-sm mt-2 {% if animal.status == 'free' %}text-green-600{% else %}text-yellow-600{% endif %}">
+                    {% if animal.status == 'free' %}Доступен{% else %}Забронирован{% endif %}
+                </span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">Питомцы не найдены</h3>
+            <p class="text-gray-600 mb-6">Попробуйте изменить параметры поиска</p>
+            <a href="{% url 'animals_list' %}" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">Сбросить фильтры</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function bookAppointment(animalId) {
+    animalId = parseInt(animalId);
+    if (confirm('Вы уверены, что хотите забронировать встречу с этим питомцем?')) {
+        fetch(`/api/adoptions/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ animal_id: animalId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Встреча успешно забронирована!');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Ошибка бронирования');
+            }
+        })
+        .catch(e => alert('Ошибка!'));
+    }
+}
+</script>
+{% endblock %}
