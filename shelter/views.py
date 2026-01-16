@@ -14,9 +14,9 @@ def animal_detail(request, pk):
 def contact(request):
     return render(request, 'shelter/contact.html')
 
-
 def animals_list(request):
-    queryset = Animal.objects.all()
+    animals = Animal.objects.all()
+    return render(request, 'shelter/animals_list.html', {'animals': animals})
 
     # Фильтры
     animal_type = request.GET.get('animal_type', '')

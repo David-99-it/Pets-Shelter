@@ -17,10 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('',include('shelter.urls')),
+      path('', include('shelter.urls')),  # главная страница — animals_list
     path('admin/', admin.site.urls),
     path('api/', include('shelter.urls')),  # подключение API приложения
     path('api/token/', TokenObtainPairView.as_view()),  # <--- JWT токен
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
