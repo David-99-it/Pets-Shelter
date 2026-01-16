@@ -54,7 +54,7 @@ MIDDLEWARE = [
     
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # для разработки
+CORS_ALLOW_ALL_ORIGINS = True 
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
